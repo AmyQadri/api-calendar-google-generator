@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Calendar Event Link Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="app" class="container mt-5">
+        <h1 class="mb-4">Google Calendar Event Link Generator</h1>
+        <form @submit.prevent="generateLink">
+            <div class="mb-3">
+                <label for="title" class="form-label">Event Title</label>
+                <input type="text" class="form-control" id="title" v-model="title" required>
+            </div>
+            <div class="mb-3">
+                <label for="details" class="form-label">Event Details</label>
+                <textarea class="form-control" id="details" v-model="details" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="start" class="form-label">Start Time</label>
+                <input type="datetime-local" class="form-control" id="start" v-model="start" required>
+            </div>
+            <div class="mb-3">
+                <label for="end" class="form-label">End Time</label>
+                <input type="datetime-local" class="form-control" id="end" v-model="end" required>
+            </div>
+            <div class="mb-3">
+                <label for="timezone" class="form-label">Time Zone</label>
+                <select class="form-select" id="timezone" v-model="timezone" required>
+                    <option value="Asia/Jakarta">WIB (Western Indonesian Time)</option>
+                    <option value="Asia/Makassar">WITA (Central Indonesian Time)</option>
+                    <option value="Asia/Jayapura">WIT (Eastern Indonesian Time)</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Generate Link</button>
+        </form>
+        <div v-if="calendarLink" class="mt-4">
+            <h2>Generated Link:</h2>
+            <a :href="calendarLink" target="_blank">{{ calendarLink }}</a>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                title: '',
+                details: '',
+                start: '',
+                end: '',
+                timezone: 'Asia/Jakarta', // Default to WIB
+                calendarLink: ''
+            },
+            methods: {
+                generateLink() {
+                    const formatDateTime = (datetime) => {
+                        return new Date(datetime).toISOString().replace(/[-:.]/g, '').split('.')[0] + 'Z';
+                    };
+
+                    const startFormatted = formatDateTime(this.start);
+                    const endFormatted = formatDateTime(this.end);
+
+                    const url = new URL('https://www.google.com/calendar/render');
+                    url.searchParams.append('action', 'TEMPLATE');
+                    url.searchParams.append('text', this.title);
+                    url.searchParams.append('details', this.details);
+                    url.searchParams.append('dates', `${startFormatted}/${endFormatted}`);
+                    url.searchParams.append('ctz', this.timezone);
+
+                    this.calendarLink = url.toString();
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
